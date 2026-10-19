@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f6feb" />
+  <title>3地点お天気</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="3地点お天気" />
+
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">3地点お天気</h1>
+    <button id="settingsBtn" class="icon-btn" aria-label="地点設定">⚙️</button>
+  </header>
+
+  <!-- 地点タブ -->
+  <nav id="tabs" class="tabs" aria-label="地点切り替え"></nav>
+
+  <!-- メイン表示 -->
+  <main id="main" class="main">
+    <div id="statusArea" class="status-area" hidden></div>
+    <section id="currentCard" class="current-card" hidden></section>
+    <section id="hourlyArea" class="hourly-area" hidden></section>
+  </main>
+
+  <!-- 設定モーダル -->
+  <div id="settingsModal" class="modal" hidden>
+    <div class="modal-inner">
+      <div class="modal-head">
+        <h2>地点の設定</h2>
+        <button id="closeSettings" class="icon-btn" aria-label="閉じる">✕</button>
+      </div>
+      <p class="modal-desc">3つの地点を登録できます。各スロットの検索欄に地名（例: 名古屋、東京、Osaka）を入力してください。</p>
+      <div id="slotEditors" class="slot-editors"></div>
+      <button id="useGeoBtn" class="secondary-btn">📍 現在地をスロット1に設定</button>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <span>データ: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></span>
+    <span id="updatedAt"></span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
