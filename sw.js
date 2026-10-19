@@ -1,6 +1,6 @@
 /* Service Worker: アプリ本体をキャッシュしオフライン起動を可能にする。
  * 天気APIのレスポンスはキャッシュせず常に最新を取得する。 */
-const CACHE = "weather3spots-v1";
+const CACHE = "weather3spots-v2";
 const APP_SHELL = [
   "./",
   "./index.html",

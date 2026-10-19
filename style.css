@@ -159,6 +159,8 @@ body {
   align-items: flex-end;
   justify-content: center;
 }
+/* hidden 属性を確実に効かせる（.modal の display:flex より優先させる） */
+.modal[hidden] { display: none; }
 .modal-inner {
   width: 100%;
   max-width: 560px;

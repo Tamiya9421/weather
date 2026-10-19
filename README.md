@@ -3,8 +3,9 @@
 iPhoneのSafariで動く、3地点の「1時間ごとの天気」を確認できるWebアプリ（PWA）です。
 ホーム画面に追加すると、ネイティブアプリのように全画面で使えます。
 
-- データ提供: [Open-Meteo](https://open-meteo.com/)（APIキー不要・無料）
-- 地点は地名検索でいつでも3つまで登録・変更可能（設定はiPhone内に保存）
+- 天気データ: [Open-Meteo](https://open-meteo.com/)（APIキー不要・無料）
+- 地名検索: [Nominatim(OpenStreetMap)](https://nominatim.openstreetmap.org/)（市区町村まで検索可。失敗時はOpen-Meteoに自動切替）
+- 地点は地名検索でいつでも3つまで登録・変更可能（例: 船橋市、刈谷市。設定はiPhone内に保存）
 - サーバ側の処理なし（静的ファイルのみ）
 
 ## 画面でできること

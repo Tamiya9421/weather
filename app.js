@@ -98,15 +98,74 @@ function firstFilledIndex() {
 /* ============================================================
  * API 呼び出し
  * ============================================================ */
+// 地名検索。戻り値は正規化済みオブジェクト配列 {name, admin, country, lat, lon}。
+// 日本の市区町村に強い Nominatim(OpenStreetMap) を優先し、失敗時は Open-Meteo にフォールバック。
 async function geocode(query) {
-  const url =
+  // 1) Nominatim: 「船橋市」「新宿区」など市区町村レベルを正しく返す
+  try {
+    const url =
+      "https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1" +
+      "&accept-language=ja&limit=8&q=" +
+      encodeURIComponent(query);
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      const items = (data || []).map(normalizeNominatim).filter(Boolean);
+      if (items.length) return dedupePlaces(items);
+    }
+  } catch (e) {
+    console.warn("Nominatim検索に失敗。Open-Meteoへ切替", e);
+  }
+
+  // 2) フォールバック: Open-Meteo Geocoding
+  const url2 =
     "https://geocoding-api.open-meteo.com/v1/search?name=" +
     encodeURIComponent(query) +
     "&count=8&language=ja&format=json";
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("地名検索に失敗しました (" + res.status + ")");
-  const data = await res.json();
-  return data.results || [];
+  const res2 = await fetch(url2);
+  if (!res2.ok) throw new Error("地名検索に失敗しました (" + res2.status + ")");
+  const data2 = await res2.json();
+  return (data2.results || []).map((r) => ({
+    name: r.name,
+    admin: [r.admin1, r.admin2].filter(Boolean).join(" "),
+    country: r.country || "",
+    lat: r.latitude,
+    lon: r.longitude,
+  }));
+}
+
+// Nominatimの1件を {name, admin, country, lat, lon} に正規化
+function normalizeNominatim(x) {
+  const a = x.address || {};
+  const name =
+    x.name ||
+    a.city || a.town || a.village || a.municipality ||
+    a.county || a.suburb ||
+    (x.display_name ? x.display_name.split(",")[0] : "");
+  if (!name) return null;
+  const lat = parseFloat(x.lat);
+  const lon = parseFloat(x.lon);
+  if (!isFinite(lat) || !isFinite(lon)) return null;
+  return {
+    name,
+    admin: a.province || a.state || a.county || "",
+    country: a.country || "",
+    lat,
+    lon,
+  };
+}
+
+// 同一地点（名前+都道府県が同じ）を除去
+function dedupePlaces(items) {
+  const seen = new Set();
+  const out = [];
+  for (const it of items) {
+    const key = it.name + "|" + it.admin;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(it);
+  }
+  return out;
 }
 
 async function fetchForecast(loc) {
@@ -328,15 +387,15 @@ async function doSearch(slot) {
     results.forEach((r) => {
       const li = document.createElement("li");
       li.innerHTML = `${escapeHtml(r.name)}<span class="sub">${escapeHtml(
-        [r.admin1, r.country].filter(Boolean).join(" / ")
+        [r.admin, r.country].filter(Boolean).join(" / ")
       )}</span>`;
       li.addEventListener("click", () => {
         locations[slot] = {
           name: r.name,
-          admin: r.admin1 || "",
+          admin: r.admin || "",
           country: r.country || "",
-          lat: r.latitude,
-          lon: r.longitude,
+          lat: r.lat,
+          lon: r.lon,
         };
         saveLocations();
         if (!locations[activeIndex]) activeIndex = slot;
